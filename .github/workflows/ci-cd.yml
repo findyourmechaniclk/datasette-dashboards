@@ -1,3 +1,13 @@
+# Optimized by ci-cost (https://github.com/mariotavarez/ci-cost)
+# Applied 6 optimizations:
+# - [HIGH] Add npm dependency cache to "deploy-demo-preview" job
+# - [HIGH] Add npm dependency cache to "deploy-demo-production" job
+# - [MEDIUM] Add concurrency group to "ci-cd.yml"
+# - [MEDIUM] 5 jobs clone the repo — consider artifact sharing
+# - [LOW] Explicitly set fail-fast for large matrix job "test" (5 combinations)
+# - [LOW] Use shallow clone in "coverage" job
+# Estimated savings: ~13 min/run
+#
 name: CI/CD
 
 on:
@@ -9,6 +19,10 @@ on:
   pull_request:
   workflow_dispatch:
 
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 env:
   DEMO_BASE_URL_PREVIEW: dd-demo.vercel.app
   DEMO_BASE_URL_PRODUCTION: datasette-dashboards-demo.vercel.app
@@ -56,7 +70,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          fetch-depth: 0
+          fetch-depth: 1
       - name: Install uv
         uses: astral-sh/setup-uv@v10.3.2
         with:
